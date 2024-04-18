@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adicionar e Visualizar Filmes</title>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Adicionar Filme</h1>
+        <form id="filme-form">
+            <label for="titulo">Título:</label>
+            <input id="titulo" type="text" required><br>
+            <label for="diretor">Diretor:</label>
+            <input id="diretor" type="text" required><br>
+            <label for="ano">Ano:</label>
+            <input id="ano" type="number" required><br>
+            <input type="submit" value="Adicionar Filme">
+        </form>
+        <div class="result"></div>
+        <button id="listar-filmes">Listar Filmes</button>
+        <ul id="lista-filmes"></ul>
+    </div>
+    <script>
+        document.getElementById("filme-form").addEventListener("submit", adicionarFilme);
+        document.getElementById("listar-filmes").addEventListener("click", listarFilmes);
+
+        // Função para adicionar um filme no "banco de dados" via API REST
+        function adicionarFilme(e) {
+            e.preventDefault();
+            const titulo = document.getElementById("titulo").value;
+            const diretor = document.getElementById("diretor").value;
+            const ano = document.getElementById("ano").value;
+
+            fetch("/filmes", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    titulo: titulo,
+                    diretor: diretor,
+                    ano: ano
+                })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    document.querySelector(".result").innerText = data.message;
+                })
+                .catch(err => console.error(err));
+        }
+
+        function listarFilmes() {
+            fetch("/filmes")
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById("lista-filmes").innerHTML = "";
+                    data.forEach(filme => {
+                        const li = document.createElement("li");
+                        li.textContent = `${filme.titulo} - ${filme.diretor} (${filme.ano})`;
+                        document.getElementById("lista-filmes").appendChild(li);
+                    });
+                })
+                .catch(err => console.error(err));
+        }
+    </script>
+    <style>
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
+        .container {
+          height: 100vh;
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+        }
+        form {
+          display: flex;
+          flex-direction: column;
+          margin-bottom: 20px;
+        }
+        label,
+        input[type="submit"] {
+          margin-top: 20px;
+        }
+      </style>
+</body>
+
+</html>
